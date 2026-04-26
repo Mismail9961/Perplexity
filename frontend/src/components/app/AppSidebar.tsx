@@ -39,7 +39,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
-      <SidebarHeader className="px-3 pt-4 pb-2">
+      <SidebarHeader className="p-2 pt-4 pb-2">
         <Link to="/" className="flex items-center gap-2">
           <div className="h-8 w-8 rounded-lg bg-gradient-primary grid place-items-center shadow-glow">
             <Sparkles className="h-4 w-4 text-primary-foreground" />
@@ -54,17 +54,21 @@ export function AppSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupContent className="px-2">
-            <Button
-              asChild
-              className="w-full justify-start gap-2 bg-secondary hover:bg-secondary/70 text-foreground border border-border"
-              size="sm"
-            >
-              <Link to="/">
-                <Plus className="h-4 w-4" />
-                {!collapsed && <span>New Thread</span>}
-              </Link>
-            </Button>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  tooltip="New Thread"
+                  className="bg-secondary hover:bg-secondary/70 text-foreground border border-border"
+                >
+                  <Link to="/" className="gap-2">
+                    <Plus className="h-4 w-4" />
+                    {!collapsed && <span>New Thread</span>}
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
 
@@ -75,7 +79,7 @@ export function AppSidebar() {
                 const active = location.pathname === item.url;
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={active}>
+                    <SidebarMenuButton asChild isActive={active} tooltip={item.title}>
                       <NavLink
                         to={item.url}
                         end
@@ -97,7 +101,7 @@ export function AppSidebar() {
       <SidebarFooter className="p-2 gap-1">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild>
+            <SidebarMenuButton asChild tooltip="Account">
               <NavLink
                 to="/account"
                 className="gap-3"
@@ -110,7 +114,7 @@ export function AppSidebar() {
           </SidebarMenuItem>
           {!isAuthenticated && (
             <SidebarMenuItem>
-              <SidebarMenuButton asChild>
+              <SidebarMenuButton asChild tooltip="Sign in">
                 <NavLink
                   to="/sign-in"
                   className="gap-3"
