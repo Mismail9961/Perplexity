@@ -3,6 +3,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import authRoutes from './routes/auth.js';
+import searchRoutes from './routes/search.js';
 
 const app = express();
 
@@ -60,6 +61,7 @@ app.get('/api', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/api/search', searchRoutes); // 🔍 Perplexity-like search endpoint
 // app.use('/api/users', userRoutes); // Uncomment when user routes exist
 
 app.use((req, res) => {
