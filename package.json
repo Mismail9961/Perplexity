@@ -1,0 +1,8 @@
+{
+  "name": "perplexity-clone",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ]
+}
