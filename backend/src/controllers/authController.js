@@ -21,7 +21,11 @@ const signup = async (req, res) => {
         });
 
         if (error) return res.status(400).json({ message: error.message });
-        return res.status(200).json({ message: "User created successfully" });
+        return res.status(200).json({
+            message: "User created successfully",
+            user: data.user,
+            session: data.session,
+        });
     } catch (error) {
         console.log(error);
         return res.status(500).json({
@@ -46,7 +50,11 @@ const login = async (req, res) => {
         });
 
         if (error) return res.status(400).json({ message: error.message });
-        return res.status(200).json({ message: "User logged in successfully" });
+        return res.status(200).json({
+            message: "User logged in successfully",
+            user: data.user,
+            session: data.session,
+        });
     } catch (error) {
         console.log(error);
         return res.status(500).json({

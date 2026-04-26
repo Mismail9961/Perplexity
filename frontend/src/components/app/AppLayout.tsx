@@ -2,8 +2,11 @@ import { Outlet, Link } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/auth";
 
 export default function AppLayout() {
+  const { isAuthenticated } = useAuth();
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
@@ -18,9 +21,11 @@ export default function AppLayout() {
               <Button asChild size="sm" variant="ghost" className="text-muted-foreground hover:text-foreground">
                 <Link to="/discover">Discover</Link>
               </Button>
-              <Button asChild size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
-                <Link to="/sign-in">Sign in</Link>
-              </Button>
+              {!isAuthenticated && (
+                <Button asChild size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
+                  <Link to="/sign-in">Sign in</Link>
+                </Button>
+              )}
             </div>
           </header>
           <main className="flex-1 min-w-0">

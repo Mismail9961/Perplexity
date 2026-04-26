@@ -9,34 +9,7 @@ const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use((req, res, next) => {
-  if (req.body !== undefined) return next();
 
-  const contentType = req.headers['content-type'] || '';
-  if (
-    !contentType ||
-    contentType.includes('text') ||
-    contentType.includes('json')
-  ) {
-    let rawData = '';
-    req.setEncoding('utf8');
-    req.on('data', chunk => {
-      rawData += chunk;
-    }); 
-    req.on('end', () => {
-      if (rawData.length === 0) return next();
-      try {
-        req.body = JSON.parse(rawData);
-      } catch {
-        req.body = rawData;
-      }
-      next();
-    });
-    req.on('error', next);
-  } else {
-    next();
-  }
-});
 app.use(cookieParser());
 app.use(cors());
 app.use(
@@ -61,8 +34,7 @@ app.get('/api', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
-app.use('/api/search', searchRoutes); // 🔍 Perplexity-like search endpoint
-// app.use('/api/users', userRoutes); // Uncomment when user routes exist
+app.use('/api/search', searchRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Router not found' });

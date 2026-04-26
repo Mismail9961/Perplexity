@@ -309,6 +309,25 @@ create index idx_api_keys_key_hash on public.api_keys(key_hash);
 
 
 -- ─────────────────────────────────────────────
+--  USER_LLM_KEYS (bring-your-own-model settings)
+-- ─────────────────────────────────────────────
+create table public.user_llm_keys (
+  id              uuid primary key default uuid_generate_v4(),
+  user_id         uuid not null references public.users(id) on delete cascade,
+  provider        text not null,                 -- e.g. groq/openai/openrouter
+  encrypted_key   text not null,                 -- encrypted API key
+  key_hint        text not null,                 -- safe hint e.g. sk-a...9Zx2
+  model           text not null,
+  base_url        text,                          -- optional OpenAI-compatible endpoint
+  name            text,
+  is_default      boolean not null default false,
+  created_at      timestamptz not null default now()
+);
+
+create index idx_user_llm_keys_user_id on public.user_llm_keys(user_id);
+
+
+-- ─────────────────────────────────────────────
 --  USAGE_EVENTS  (analytics + billing)
 -- ─────────────────────────────────────────────
 create table public.usage_events (
@@ -474,6 +493,7 @@ alter table public.space_members      enable row level security;
 alter table public.collections        enable row level security;
 alter table public.collection_threads enable row level security;
 alter table public.api_keys           enable row level security;
+alter table public.user_llm_keys      enable row level security;
 alter table public.feedback           enable row level security;
 
 -- users: own row only
@@ -537,6 +557,10 @@ create policy "spaces_delete" on public.spaces for delete
 
 -- api_keys: own keys only
 create policy "api_keys_self" on public.api_keys
+  using (user_id = auth.uid());
+
+-- user_llm_keys: own keys only
+create policy "user_llm_keys_self" on public.user_llm_keys
   using (user_id = auth.uid());
 
 -- collections: own collections only

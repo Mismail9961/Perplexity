@@ -1,10 +1,53 @@
 import SearchBox from "@/components/app/SearchBox";
-import { suggestedQueries, recentThreads } from "@/data/mock";
+import { suggestedQueries } from "@/data/mock";
 import { Link, useNavigate } from "react-router-dom";
 import { Clock, Sparkles, TrendingUp } from "lucide-react";
+import { useAuth } from "@/lib/auth";
+import { useEffect, useMemo, useState } from "react";
+import { getHistory } from "@/lib/api";
+import { getLocalThreads } from "@/lib/localHistory";
 
 export default function Index() {
   const navigate = useNavigate();
+  const { token } = useAuth();
+  const [threads, setThreads] = useState<Array<{ id: string; title: string | null; created_at: string }>>([]);
+
+  useEffect(() => {
+    async function loadRecentThreads() {
+      const local = getLocalThreads();
+      if (!token) {
+        setThreads(local.slice(0, 4));
+        return;
+      }
+
+      try {
+        const data = await getHistory(token);
+        const merged = [...data.threads, ...local].reduce<Array<{ id: string; title: string | null; created_at: string }>>(
+          (acc, item) => {
+            if (!acc.some((thread) => thread.id === item.id)) acc.push(item);
+            return acc;
+          },
+          []
+        );
+        merged.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        setThreads(merged.slice(0, 4));
+      } catch {
+        setThreads(local.slice(0, 4));
+      }
+    }
+
+    loadRecentThreads();
+  }, [token]);
+
+  const recentThreads = useMemo(
+    () =>
+      threads.map((thread) => ({
+        id: thread.id,
+        title: thread.title ?? "Untitled thread",
+        time: new Date(thread.created_at).toLocaleString(),
+      })),
+    [threads]
+  );
 
   return (
     <div className="relative min-h-[calc(100vh-3.5rem)]">
@@ -52,7 +95,7 @@ export default function Index() {
             {recentThreads.slice(0, 4).map((t) => (
               <Link
                 key={t.id}
-                to={`/search?q=${encodeURIComponent(t.title)}`}
+                to={`/search?q=${encodeURIComponent(t.title)}&threadId=${t.id}`}
                 className="flex items-center justify-between px-4 py-3 hover:bg-surface-elevated/50 transition-colors"
               >
                 <div className="flex items-center gap-3 min-w-0">
@@ -62,6 +105,11 @@ export default function Index() {
                 <span className="text-xs text-muted-foreground flex-shrink-0 ml-3">{t.time}</span>
               </Link>
             ))}
+            {recentThreads.length === 0 && (
+              <div className="px-4 py-4 text-sm text-muted-foreground">
+                No recent threads yet.
+              </div>
+            )}
           </div>
         </div>
       </div>

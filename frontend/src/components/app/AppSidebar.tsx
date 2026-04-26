@@ -14,6 +14,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/auth";
 
 const items = [
   { title: "Home", url: "/", icon: Sparkles },
@@ -26,6 +27,7 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
+  const { isAuthenticated } = useAuth();
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
@@ -92,14 +94,16 @@ export function AppSidebar() {
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <NavLink to="/sign-in" className="gap-3" activeClassName="bg-sidebar-accent text-sidebar-accent-foreground">
-                <LogIn className="h-4 w-4" />
-                {!collapsed && <span>Sign in</span>}
-              </NavLink>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          {!isAuthenticated && (
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <NavLink to="/sign-in" className="gap-3" activeClassName="bg-sidebar-accent text-sidebar-accent-foreground">
+                  <LogIn className="h-4 w-4" />
+                  {!collapsed && <span>Sign in</span>}
+                </NavLink>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>

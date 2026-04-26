@@ -16,6 +16,7 @@ export * from "./searchCacheModel.js";
 export * from "./spaceModel.js";
 export * from "./collectionModel.js";
 export * from "./apiKeyModel.js";
+export * from "./userLlmKeyModel.js";
 export * from "./usageModel.js";
 export * from "./feedbackModel.js";
 export * from "./trendingModel.js";

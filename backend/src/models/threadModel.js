@@ -109,3 +109,16 @@ export async function deleteThread(threadId) {
 
   if (error) throw error;
 }
+
+/**
+ * Delete all threads owned by a user.
+ * @param {string} userId
+ */
+export async function deleteThreadsByUser(userId) {
+  const { error } = await supabase
+    .from("threads")
+    .delete()
+    .eq("user_id", userId);
+
+  if (error) throw error;
+}

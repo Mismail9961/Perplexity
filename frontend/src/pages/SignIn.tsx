@@ -2,8 +2,46 @@ import { Link } from "react-router-dom";
 import { Sparkles, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useState } from "react";
+import { login, signup } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
+import { useNavigate } from "react-router-dom";
 
 export default function SignIn() {
+  const [mode, setMode] = useState<"login" | "signup">("login");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { setSession } = useAuth();
+  const navigate = useNavigate();
+
+  async function handleEmailAuth() {
+    if (!email.trim() || !password.trim() || (mode === "signup" && !name.trim())) return;
+    setError(null);
+    setLoading(true);
+    try {
+      const response =
+        mode === "login"
+          ? await login(email, password)
+          : await signup(name.trim(), email, password);
+
+      if (response.session?.access_token) {
+        setSession(response.session.access_token, response.user?.email ?? email);
+        navigate("/");
+        return;
+      }
+
+      setError("Signed up successfully. Please sign in to continue.");
+      if (mode === "signup") setMode("login");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Authentication failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="relative min-h-[calc(100vh-3.5rem)] grid place-items-center px-4">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -37,10 +75,45 @@ export default function SignIn() {
         </div>
 
         <div className="space-y-3">
-          <Input type="email" placeholder="you@example.com" className="bg-secondary border-border" />
-          <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
-            <Mail className="h-4 w-4 mr-2" /> Continue with email
+          {mode === "signup" && (
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Your name"
+              className="bg-secondary border-border"
+            />
+          )}
+          <Input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            className="bg-secondary border-border"
+          />
+          <Input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Password"
+            className="bg-secondary border-border"
+          />
+          <Button
+            onClick={handleEmailAuth}
+            disabled={loading}
+            className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+          >
+            <Mail className="h-4 w-4 mr-2" />
+            {loading ? "Please wait..." : mode === "login" ? "Sign in with email" : "Create account"}
           </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            className="w-full text-xs"
+            onClick={() => setMode(mode === "login" ? "signup" : "login")}
+          >
+            {mode === "login" ? "Need an account? Sign up" : "Already have an account? Sign in"}
+          </Button>
+          {error && <p className="text-xs text-destructive">{error}</p>}
         </div>
 
         <p className="text-xs text-muted-foreground text-center mt-6">
