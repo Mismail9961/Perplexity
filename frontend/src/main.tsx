@@ -6,5 +6,5 @@ import { AuthProvider } from "./lib/auth.tsx";
 createRoot(document.getElementById("root")!).render(
   <AuthProvider>
     <App />
-  </AuthProvider>
+  </AuthProvider>,
 );

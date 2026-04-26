@@ -15,14 +15,25 @@ export default function AppLayout() {
           <header className="h-14 flex items-center justify-between border-b border-border/60 px-3 md:px-6 bg-background/70 backdrop-blur sticky top-0 z-20">
             <div className="flex items-center gap-2">
               <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
-              <Link to="/" className="md:hidden font-serif text-lg">askly</Link>
+              <Link to="/" className="md:hidden font-serif text-lg">
+                askly
+              </Link>
             </div>
             <div className="flex items-center gap-2">
-              <Button asChild size="sm" variant="ghost" className="text-muted-foreground hover:text-foreground">
+              <Button
+                asChild
+                size="sm"
+                variant="ghost"
+                className="text-muted-foreground hover:text-foreground"
+              >
                 <Link to="/discover">Discover</Link>
               </Button>
               {!isAuthenticated && (
-                <Button asChild size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
+                <Button
+                  asChild
+                  size="sm"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90"
+                >
                   <Link to="/sign-in">Sign in</Link>
                 </Button>
               )}

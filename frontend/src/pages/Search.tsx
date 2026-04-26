@@ -1,7 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import SearchBox from "@/components/app/SearchBox";
-import { BookOpen, Globe, Image as ImageIcon, ListTree, Share2, ThumbsDown, ThumbsUp, Copy, Plus } from "lucide-react";
+import {
+  BookOpen,
+  Globe,
+  Image as ImageIcon,
+  ListTree,
+  Share2,
+  ThumbsDown,
+  ThumbsUp,
+  Copy,
+  Plus,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { listLlmKeys, searchQuery, type SearchResponse } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
@@ -25,8 +35,12 @@ export default function Search() {
   const [result, setResult] = useState<SearchResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [llmKeys, setLlmKeys] = useState<Array<{ id: string; provider: string; model: string; name: string | null }>>([]);
-  const [selectedLlmKeyId, setSelectedLlmKeyId] = useState<string>(() => localStorage.getItem("askly_selected_llm_key_id") ?? "");
+  const [llmKeys, setLlmKeys] = useState<
+    Array<{ id: string; provider: string; model: string; name: string | null }>
+  >([]);
+  const [selectedLlmKeyId, setSelectedLlmKeyId] = useState<string>(
+    () => localStorage.getItem("askly_selected_llm_key_id") ?? "",
+  );
   const [localLlmKeys] = useState<LocalLlmKey[]>(() => getLocalLlmKeys());
   const lastSavedSignatureRef = useRef<string>("");
 
@@ -36,8 +50,12 @@ export default function Search() {
       setLoading(true);
       setError(null);
       try {
-        const localKey = localLlmKeys.find((key) => key.id === selectedLlmKeyId);
-        const effectiveThreadId = threadId?.startsWith("local_") ? undefined : threadId;
+        const localKey = localLlmKeys.find(
+          (key) => key.id === selectedLlmKeyId,
+        );
+        const effectiveThreadId = threadId?.startsWith("local_")
+          ? undefined
+          : threadId;
         const data = await searchQuery(
           token,
           q,
@@ -50,7 +68,7 @@ export default function Search() {
                 model: localKey.model,
                 baseUrl: localKey.baseUrl,
               }
-            : undefined
+            : undefined,
         );
         setResult(data);
       } catch (err) {
@@ -83,7 +101,9 @@ export default function Search() {
     lastSavedSignatureRef.current = signature;
 
     saveLocalThread({
-      id: result?.threadId ?? `local_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      id:
+        result?.threadId ??
+        `local_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
       title: q.trim(),
       created_at: new Date().toISOString(),
     });
@@ -97,21 +117,20 @@ export default function Search() {
       `Latest updates on ${q || "this topic"}`,
       `Beginner guide for ${q || "this"}`,
     ],
-    [q]
+    [q],
   );
   const modelOptions = useMemo(
-    () =>
-      [
-        ...llmKeys.map((key) => ({
-          id: key.id,
-          label: `${key.provider}/${key.model}${key.name ? ` (${key.name})` : ""}`,
-        })),
-        ...localLlmKeys.map((key) => ({
-          id: key.id,
-          label: `${key.provider}/${key.model}${key.name ? ` (${key.name})` : ""} (local)`,
-        })),
-      ],
-    [llmKeys, localLlmKeys]
+    () => [
+      ...llmKeys.map((key) => ({
+        id: key.id,
+        label: `${key.provider}/${key.model}${key.name ? ` (${key.name})` : ""}`,
+      })),
+      ...localLlmKeys.map((key) => ({
+        id: key.id,
+        label: `${key.provider}/${key.model}${key.name ? ` (${key.name})` : ""} (local)`,
+      })),
+    ],
+    [llmKeys, localLlmKeys],
   );
 
   return (
@@ -121,7 +140,11 @@ export default function Search() {
       </h1>
       {!token && (
         <p className="text-sm text-muted-foreground mb-4">
-          Please <Link to="/sign-in" className="text-primary hover:underline">sign in</Link> to search.
+          Please{" "}
+          <Link to="/sign-in" className="text-primary hover:underline">
+            sign in
+          </Link>{" "}
+          to search.
         </p>
       )}
 
@@ -163,8 +186,12 @@ export default function Search() {
                   rel="noreferrer"
                   className="surface-card p-3 hover:border-primary/40 transition-colors group"
                 >
-                  <div className="text-xs text-muted-foreground mb-1 truncate">{getDomain(s.url)}</div>
-                  <div className="text-sm font-medium line-clamp-2 group-hover:text-primary">{s.title}</div>
+                  <div className="text-xs text-muted-foreground mb-1 truncate">
+                    {getDomain(s.url)}
+                  </div>
+                  <div className="text-sm font-medium line-clamp-2 group-hover:text-primary">
+                    {s.title}
+                  </div>
                 </a>
               ))}
             </div>
@@ -172,17 +199,45 @@ export default function Search() {
 
           {/* Answer */}
           <div className="surface-card p-6 space-y-5">
-            {loading && <p className="text-muted-foreground text-sm">Searching...</p>}
+            {loading && (
+              <p className="text-muted-foreground text-sm">Searching...</p>
+            )}
             {error && <p className="text-destructive text-sm">{error}</p>}
             {!loading && !error && answerText && (
-              <p className="text-foreground/90 leading-relaxed whitespace-pre-line">{answerText}</p>
+              <p className="text-foreground/90 leading-relaxed whitespace-pre-line">
+                {answerText}
+              </p>
             )}
 
             <div className="flex items-center gap-1 pt-2 border-t border-border">
-              <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground"><ThumbsUp className="h-4 w-4" /></Button>
-              <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground"><ThumbsDown className="h-4 w-4" /></Button>
-              <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground"><Copy className="h-4 w-4" /></Button>
-              <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground"><Share2 className="h-4 w-4" /></Button>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8 text-muted-foreground"
+              >
+                <ThumbsUp className="h-4 w-4" />
+              </Button>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8 text-muted-foreground"
+              >
+                <ThumbsDown className="h-4 w-4" />
+              </Button>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8 text-muted-foreground"
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8 text-muted-foreground"
+              >
+                <Share2 className="h-4 w-4" />
+              </Button>
             </div>
           </div>
 
@@ -230,7 +285,9 @@ export default function Search() {
 
         {/* Right rail: all sources */}
         <aside className="space-y-3">
-          <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">All sources</h3>
+          <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            All sources
+          </h3>
           <ol className="space-y-2">
             {sources.map((s, idx) => (
               <li key={`${s.url}-${idx}`}>
@@ -241,11 +298,17 @@ export default function Search() {
                   className="block surface-card p-3 hover:border-primary/40"
                 >
                   <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
-                    <span className="h-5 w-5 grid place-items-center rounded-md bg-secondary text-foreground text-[10px]">{idx + 1}</span>
+                    <span className="h-5 w-5 grid place-items-center rounded-md bg-secondary text-foreground text-[10px]">
+                      {idx + 1}
+                    </span>
                     <span className="truncate">{getDomain(s.url)}</span>
                   </div>
-                  <div className="text-sm font-medium line-clamp-2">{s.title}</div>
-                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{s.snippet}</p>
+                  <div className="text-sm font-medium line-clamp-2">
+                    {s.title}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                    {s.snippet}
+                  </p>
                 </a>
               </li>
             ))}

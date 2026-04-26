@@ -1,4 +1,12 @@
-import { Compass, Library, Layers, Plus, Settings, Sparkles, LogIn } from "lucide-react";
+import {
+  Compass,
+  Library,
+  Layers,
+  Plus,
+  Settings,
+  Sparkles,
+  LogIn,
+} from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, Link } from "react-router-dom";
 import {
@@ -37,7 +45,9 @@ export function AppSidebar() {
             <Sparkles className="h-4 w-4 text-primary-foreground" />
           </div>
           {!collapsed && (
-            <span className="font-serif text-lg font-semibold tracking-tight">askly</span>
+            <span className="font-serif text-lg font-semibold tracking-tight">
+              askly
+            </span>
           )}
         </Link>
       </SidebarHeader>
@@ -88,7 +98,11 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <NavLink to="/account" className="gap-3" activeClassName="bg-sidebar-accent text-sidebar-accent-foreground">
+              <NavLink
+                to="/account"
+                className="gap-3"
+                activeClassName="bg-sidebar-accent text-sidebar-accent-foreground"
+              >
                 <Settings className="h-4 w-4" />
                 {!collapsed && <span>Account</span>}
               </NavLink>
@@ -97,7 +111,11 @@ export function AppSidebar() {
           {!isAuthenticated && (
             <SidebarMenuItem>
               <SidebarMenuButton asChild>
-                <NavLink to="/sign-in" className="gap-3" activeClassName="bg-sidebar-accent text-sidebar-accent-foreground">
+                <NavLink
+                  to="/sign-in"
+                  className="gap-3"
+                  activeClassName="bg-sidebar-accent text-sidebar-accent-foreground"
+                >
                   <LogIn className="h-4 w-4" />
                   {!collapsed && <span>Sign in</span>}
                 </NavLink>

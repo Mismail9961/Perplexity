@@ -9,7 +9,9 @@ import { getLocalThreads } from "@/lib/localHistory";
 export default function LibraryPage() {
   const { token } = useAuth();
   const [search, setSearch] = useState("");
-  const [threads, setThreads] = useState<Array<{ id: string; title: string | null; created_at: string }>>([]);
+  const [threads, setThreads] = useState<
+    Array<{ id: string; title: string | null; created_at: string }>
+  >([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -19,14 +21,16 @@ export default function LibraryPage() {
       if (!token) return;
       try {
         const data = await getHistory(token);
-        const merged = [...data.threads, ...local].reduce<Array<{ id: string; title: string | null; created_at: string }>>(
-          (acc, item) => {
-            if (!acc.some((thread) => thread.id === item.id)) acc.push(item);
-            return acc;
-          },
-          []
+        const merged = [...data.threads, ...local].reduce<
+          Array<{ id: string; title: string | null; created_at: string }>
+        >((acc, item) => {
+          if (!acc.some((thread) => thread.id === item.id)) acc.push(item);
+          return acc;
+        }, []);
+        merged.sort(
+          (a, b) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
         );
-        merged.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
         setThreads(merged);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load history");
@@ -38,18 +42,24 @@ export default function LibraryPage() {
   const filtered = useMemo(
     () =>
       threads.filter((thread) =>
-        (thread.title ?? "Untitled thread").toLowerCase().includes(search.trim().toLowerCase())
+        (thread.title ?? "Untitled thread")
+          .toLowerCase()
+          .includes(search.trim().toLowerCase()),
       ),
-    [threads, search]
+    [threads, search],
   );
 
   return (
     <div className="mx-auto max-w-4xl px-4 md:px-8 py-8 animate-fade-up">
       <div className="flex items-center gap-3 mb-2">
         <LibraryIcon className="h-6 w-6 text-primary" />
-        <h1 className="font-serif text-3xl md:text-4xl font-medium tracking-tight">Library</h1>
+        <h1 className="font-serif text-3xl md:text-4xl font-medium tracking-tight">
+          Library
+        </h1>
       </div>
-      <p className="text-muted-foreground mb-6">Your past threads and saved searches.</p>
+      <p className="text-muted-foreground mb-6">
+        Your past threads and saved searches.
+      </p>
 
       <div className="relative mb-6">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -80,8 +90,12 @@ export default function LibraryPage() {
                 <MessageSquare className="h-4 w-4 text-primary" />
               </div>
               <div className="min-w-0">
-                <div className="truncate font-medium">{t.title ?? "Untitled thread"}</div>
-                <div className="text-xs text-muted-foreground">{new Date(t.created_at).toLocaleString()}</div>
+                <div className="truncate font-medium">
+                  {t.title ?? "Untitled thread"}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {new Date(t.created_at).toLocaleString()}
+                </div>
               </div>
             </div>
           </Link>

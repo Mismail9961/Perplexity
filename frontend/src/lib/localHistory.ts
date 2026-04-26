@@ -23,7 +23,10 @@ export function saveLocalThread(thread: LocalThread) {
   const incomingTime = new Date(thread.created_at).getTime();
 
   const duplicateByTitleAndTime = all.find((item) => {
-    if ((item.title ?? "").trim().toLowerCase() !== (thread.title ?? "").trim().toLowerCase()) {
+    if (
+      (item.title ?? "").trim().toLowerCase() !==
+      (thread.title ?? "").trim().toLowerCase()
+    ) {
       return false;
     }
     const existingTime = new Date(item.created_at).getTime();

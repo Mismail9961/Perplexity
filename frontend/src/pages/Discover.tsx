@@ -2,16 +2,27 @@ import { trendingTopics } from "@/data/mock";
 import { Link } from "react-router-dom";
 import { Compass } from "lucide-react";
 
-const categories = ["For You", "Top", "Tech & Science", "Finance", "Arts & Culture", "Sports"];
+const categories = [
+  "For You",
+  "Top",
+  "Tech & Science",
+  "Finance",
+  "Arts & Culture",
+  "Sports",
+];
 
 export default function Discover() {
   return (
     <div className="mx-auto max-w-6xl px-4 md:px-8 py-8 animate-fade-up">
       <div className="flex items-center gap-3 mb-2">
         <Compass className="h-6 w-6 text-primary" />
-        <h1 className="font-serif text-3xl md:text-4xl font-medium tracking-tight">Discover</h1>
+        <h1 className="font-serif text-3xl md:text-4xl font-medium tracking-tight">
+          Discover
+        </h1>
       </div>
-      <p className="text-muted-foreground mb-6">A handpicked feed of stories worth knowing today.</p>
+      <p className="text-muted-foreground mb-6">
+        A handpicked feed of stories worth knowing today.
+      </p>
 
       <div className="flex flex-wrap gap-2 mb-8">
         {categories.map((c, i) => (

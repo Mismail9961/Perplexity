@@ -1,4 +1,5 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000";
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000";
 
 type RequestOptions = {
   method?: "GET" | "POST" | "DELETE";
@@ -6,7 +7,10 @@ type RequestOptions = {
   token?: string | null;
 };
 
-async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+async function request<T>(
+  path: string,
+  options: RequestOptions = {},
+): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     method: options.method ?? "GET",
     headers: {
@@ -64,7 +68,12 @@ export function searchQuery(
   query: string,
   threadId?: string,
   llmKeyId?: string,
-  llmConfigOverride?: { provider: string; apiKey: string; model: string; baseUrl?: string }
+  llmConfigOverride?: {
+    provider: string;
+    apiKey: string;
+    model: string;
+    baseUrl?: string;
+  },
 ) {
   return request<SearchResponse>("/api/search", {
     method: "POST",
@@ -74,10 +83,9 @@ export function searchQuery(
 }
 
 export function getHistory(token: string) {
-  return request<{ threads: Array<{ id: string; title: string | null; created_at: string }> }>(
-    "/api/search/history",
-    { token }
-  );
+  return request<{
+    threads: Array<{ id: string; title: string | null; created_at: string }>;
+  }>("/api/search/history", { token });
 }
 
 export function clearHistory(token: string) {
@@ -90,7 +98,12 @@ export function clearHistory(token: string) {
 export function getThread(token: string, threadId: string) {
   return request<{
     thread: { id: string; title: string | null };
-    messages: Array<{ id: string; role: "user" | "assistant" | "system"; content: string; created_at: string }>;
+    messages: Array<{
+      id: string;
+      role: "user" | "assistant" | "system";
+      content: string;
+      created_at: string;
+    }>;
   }>(`/api/search/history/${threadId}`, { token });
 }
 
@@ -105,15 +118,28 @@ export function getTokenStatus(token: string) {
 }
 
 export function listLlmKeys(token: string) {
-  return request<{ keys: Array<{ id: string; provider: string; model: string; name: string | null; is_default: boolean; key_hint: string }> }>(
-    "/api/search/llm-keys",
-    { token }
-  );
+  return request<{
+    keys: Array<{
+      id: string;
+      provider: string;
+      model: string;
+      name: string | null;
+      is_default: boolean;
+      key_hint: string;
+    }>;
+  }>("/api/search/llm-keys", { token });
 }
 
 export function addLlmKey(
   token: string,
-  payload: { provider: string; apiKey: string; model: string; baseUrl?: string; name?: string; isDefault?: boolean }
+  payload: {
+    provider: string;
+    apiKey: string;
+    model: string;
+    baseUrl?: string;
+    name?: string;
+    isDefault?: boolean;
+  },
 ) {
   return request<{ message: string }>("/api/search/llm-keys", {
     method: "POST",

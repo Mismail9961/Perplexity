@@ -37,7 +37,7 @@ export default function SearchBox({
       <div
         className={cn(
           "group rounded-2xl border border-border bg-surface shadow-card transition-all",
-          "focus-within:border-primary/60 focus-within:shadow-glow"
+          "focus-within:border-primary/60 focus-within:shadow-glow",
         )}
       >
         <textarea
@@ -47,7 +47,7 @@ export default function SearchBox({
           placeholder="Ask anything…"
           className={cn(
             "w-full resize-none bg-transparent outline-none px-5 pt-4 pb-2 text-foreground placeholder:text-muted-foreground/70",
-            large ? "text-lg" : "text-base"
+            large ? "text-lg" : "text-base",
           )}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
@@ -75,17 +75,37 @@ export default function SearchBox({
                 </select>
               </div>
             ) : (
-              <Button type="button" size="sm" variant="ghost" className="h-8 gap-1.5 text-xs">
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                className="h-8 gap-1.5 text-xs"
+              >
                 <Cpu className="h-3.5 w-3.5" /> Default model
               </Button>
             )}
-            <Button type="button" size="sm" variant="ghost" className="h-8 gap-1.5 text-xs">
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              className="h-8 gap-1.5 text-xs"
+            >
               <Globe className="h-3.5 w-3.5" /> Web
             </Button>
-            <Button type="button" size="icon" variant="ghost" className="h-8 w-8">
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              className="h-8 w-8"
+            >
               <Paperclip className="h-4 w-4" />
             </Button>
-            <Button type="button" size="icon" variant="ghost" className="h-8 w-8">
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              className="h-8 w-8"
+            >
               <Mic className="h-4 w-4" />
             </Button>
           </div>

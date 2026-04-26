@@ -10,7 +10,9 @@ import { getLocalThreads } from "@/lib/localHistory";
 export default function Index() {
   const navigate = useNavigate();
   const { token } = useAuth();
-  const [threads, setThreads] = useState<Array<{ id: string; title: string | null; created_at: string }>>([]);
+  const [threads, setThreads] = useState<
+    Array<{ id: string; title: string | null; created_at: string }>
+  >([]);
 
   useEffect(() => {
     async function loadRecentThreads() {
@@ -22,14 +24,16 @@ export default function Index() {
 
       try {
         const data = await getHistory(token);
-        const merged = [...data.threads, ...local].reduce<Array<{ id: string; title: string | null; created_at: string }>>(
-          (acc, item) => {
-            if (!acc.some((thread) => thread.id === item.id)) acc.push(item);
-            return acc;
-          },
-          []
+        const merged = [...data.threads, ...local].reduce<
+          Array<{ id: string; title: string | null; created_at: string }>
+        >((acc, item) => {
+          if (!acc.some((thread) => thread.id === item.id)) acc.push(item);
+          return acc;
+        }, []);
+        merged.sort(
+          (a, b) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
         );
-        merged.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
         setThreads(merged.slice(0, 4));
       } catch {
         setThreads(local.slice(0, 4));
@@ -46,7 +50,7 @@ export default function Index() {
         title: thread.title ?? "Untitled thread",
         time: new Date(thread.created_at).toLocaleString(),
       })),
-    [threads]
+    [threads],
   );
 
   return (
@@ -89,7 +93,12 @@ export default function Index() {
             <h2 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <Clock className="h-4 w-4" /> Recent threads
             </h2>
-            <Link to="/library" className="text-xs text-primary hover:underline">View all</Link>
+            <Link
+              to="/library"
+              className="text-xs text-primary hover:underline"
+            >
+              View all
+            </Link>
           </div>
           <div className="surface-card divide-y divide-border">
             {recentThreads.slice(0, 4).map((t) => (
@@ -102,7 +111,9 @@ export default function Index() {
                   <TrendingUp className="h-4 w-4 text-primary flex-shrink-0" />
                   <span className="truncate">{t.title}</span>
                 </div>
-                <span className="text-xs text-muted-foreground flex-shrink-0 ml-3">{t.time}</span>
+                <span className="text-xs text-muted-foreground flex-shrink-0 ml-3">
+                  {t.time}
+                </span>
               </Link>
             ))}
             {recentThreads.length === 0 && (
