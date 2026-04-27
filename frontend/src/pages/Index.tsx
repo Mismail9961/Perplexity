@@ -15,13 +15,14 @@ export default function Index() {
   >([]);
 
   useEffect(() => {
+    // Don't load threads if user is not logged in
+    if (!token) {
+      setThreads([]);
+      return;
+    }
+
     async function loadRecentThreads() {
       const local = getLocalThreads();
-      if (!token) {
-        setThreads(local.slice(0, 4));
-        return;
-      }
-
       try {
         const data = await getHistory(token);
         const merged = [...data.threads, ...local].reduce<
@@ -88,41 +89,43 @@ export default function Index() {
           ))}
         </div>
 
-        <div className="mt-12">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <Clock className="h-4 w-4" /> Recent threads
-            </h2>
-            <Link
-              to="/library"
-              className="text-xs text-primary hover:underline"
-            >
-              View all
-            </Link>
-          </div>
-          <div className="surface-card divide-y divide-border">
-            {recentThreads.slice(0, 4).map((t) => (
+        {token && (
+          <div className="mt-12">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Clock className="h-4 w-4" /> Recent threads
+              </h2>
               <Link
-                key={t.id}
-                to={`/search?q=${encodeURIComponent(t.title)}&threadId=${t.id}`}
-                className="flex items-center justify-between px-4 py-3 hover:bg-surface-elevated/50 transition-colors"
+                to="/library"
+                className="text-xs text-primary hover:underline"
               >
-                <div className="flex items-center gap-3 min-w-0">
-                  <TrendingUp className="h-4 w-4 text-primary flex-shrink-0" />
-                  <span className="truncate">{t.title}</span>
-                </div>
-                <span className="text-xs text-muted-foreground flex-shrink-0 ml-3">
-                  {t.time}
-                </span>
+                View all
               </Link>
-            ))}
-            {recentThreads.length === 0 && (
-              <div className="px-4 py-4 text-sm text-muted-foreground">
-                No recent threads yet.
-              </div>
-            )}
+            </div>
+            <div className="surface-card divide-y divide-border">
+              {recentThreads.slice(0, 4).map((t) => (
+                <Link
+                  key={t.id}
+                  to={`/search?q=${encodeURIComponent(t.title)}&threadId=${t.id}`}
+                  className="flex items-center justify-between px-4 py-3 hover:bg-surface-elevated/50 transition-colors"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <TrendingUp className="h-4 w-4 text-primary flex-shrink-0" />
+                    <span className="truncate">{t.title}</span>
+                  </div>
+                  <span className="text-xs text-muted-foreground flex-shrink-0 ml-3">
+                    {t.time}
+                  </span>
+                </Link>
+              ))}
+              {recentThreads.length === 0 && (
+                <div className="px-4 py-4 text-sm text-muted-foreground">
+                  No recent threads yet.
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

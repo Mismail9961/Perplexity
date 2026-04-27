@@ -7,11 +7,29 @@ import searchRoutes from './routes/search.js';
 
 const app = express();
 
+const allowedOrigins = [
+  "https://perplexity-pi.vercel.app",
+  "http://localhost:5173",
+  "http://localhost:3000",
+];
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(cors());
-app.use(morgan('combined'));
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g. curl, Postman, same-origin)
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error(`CORS: origin '${origin}' not allowed`));
+      }
+    },
+    credentials: true,
+  }),
+);
+app.use(morgan("combined"));
 
 app.get('/', (req, res) => {
   res.status(200).send('Hello from Perplexity API');
