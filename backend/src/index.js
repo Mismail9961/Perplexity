@@ -9,16 +9,12 @@ const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
 app.use(cookieParser());
 app.use(cors());
-app.use(
-  morgan('combined')
-);
+app.use(morgan('combined'));
 
 app.get('/', (req, res) => {
-  console.log('Received a request to the root endpoint');
-  res.status(200).send('Hello for Perplexity API');
+  res.status(200).send('Hello from Perplexity API');
 });
 
 app.get('/health', (req, res) => {
@@ -37,12 +33,14 @@ app.use('/api/auth', authRoutes);
 app.use('/api/search', searchRoutes);
 
 app.use((req, res) => {
-  res.status(404).json({ error: 'Router not found' });
+  res.status(404).json({ error: 'Route not found' });
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
 
 export default app;
