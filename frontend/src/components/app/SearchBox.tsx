@@ -1,13 +1,15 @@
 import { useState, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Globe, Paperclip, Mic, Cpu } from "lucide-react";
+import { ArrowRight, Globe, Paperclip, Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import ModelSelector from "./ModelSelector";
 
 interface SearchBoxProps {
   initial?: string;
   large?: boolean;
   onSubmit?: (q: string) => void;
+  /** @deprecated — model selection is now handled internally via ModelSelector */
   modelOptions?: Array<{ id: string; label: string }>;
   selectedModelId?: string;
   onModelChange?: (id: string) => void;
@@ -17,7 +19,6 @@ export default function SearchBox({
   initial = "",
   large = false,
   onSubmit,
-  modelOptions = [],
   selectedModelId = "",
   onModelChange,
 }: SearchBoxProps) {
@@ -58,32 +59,12 @@ export default function SearchBox({
         />
         <div className="flex items-center justify-between px-3 pb-3 pt-1">
           <div className="flex items-center gap-1 text-muted-foreground">
-            {modelOptions.length > 0 ? (
-              <div className="h-8 px-2 rounded-md border border-border bg-secondary/40 flex items-center gap-1.5">
-                <Cpu className="h-3.5 w-3.5" />
-                <select
-                  className="bg-transparent text-xs outline-none"
-                  value={selectedModelId}
-                  onChange={(e) => onModelChange?.(e.target.value)}
-                >
-                  <option value="">Default model</option>
-                  {modelOptions.map((option) => (
-                    <option key={option.id} value={option.id}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            ) : (
-              <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                className="h-8 gap-1.5 text-xs"
-              >
-                <Cpu className="h-3.5 w-3.5" /> Default model
-              </Button>
-            )}
+            {/* Model selector */}
+            <ModelSelector
+              selectedId={selectedModelId}
+              onChange={(id) => onModelChange?.(id)}
+            />
+
             <Button
               type="button"
               size="sm"

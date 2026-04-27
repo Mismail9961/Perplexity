@@ -13,10 +13,11 @@ import {
   Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { listLlmKeys, searchQuery, type SearchResponse } from "@/lib/api";
+import { searchQuery, type SearchResponse } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { saveLocalThread } from "@/lib/localHistory";
-import { getLocalLlmKeys, type LocalLlmKey } from "@/lib/localLlmKeys";
+import { getLocalLlmKeys } from "@/lib/localLlmKeys";
+import { PRESET_MODELS } from "@/components/app/ModelSelector";
 
 function getDomain(url: string) {
   try {
@@ -35,13 +36,9 @@ export default function Search() {
   const [result, setResult] = useState<SearchResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [llmKeys, setLlmKeys] = useState<
-    Array<{ id: string; provider: string; model: string; name: string | null }>
-  >([]);
-  const [selectedLlmKeyId, setSelectedLlmKeyId] = useState<string>(
-    () => localStorage.getItem("askly_selected_llm_key_id") ?? "",
+  const [selectedModelId, setSelectedModelId] = useState<string>(
+    () => localStorage.getItem("askly_selected_model_id") ?? "",
   );
-  const [localLlmKeys] = useState<LocalLlmKey[]>(() => getLocalLlmKeys());
   const lastSavedSignatureRef = useRef<string>("");
 
   useEffect(() => {
@@ -50,25 +47,35 @@ export default function Search() {
       setLoading(true);
       setError(null);
       try {
-        const localKey = localLlmKeys.find(
-          (key) => key.id === selectedLlmKeyId,
-        );
+        // Resolve llmConfigOverride from preset catalogue or locally saved keys
+        const preset = PRESET_MODELS.find((m) => m.id === selectedModelId);
+        const localKeys = getLocalLlmKeys();
+        const localKey = localKeys.find((k) => k.id === selectedModelId);
+
+        let llmConfigOverride:
+          | { provider: string; apiKey: string; model: string; baseUrl?: string }
+          | undefined;
+
+        if (localKey) {
+          llmConfigOverride = {
+            provider: localKey.provider,
+            apiKey: localKey.apiKey,
+            model: localKey.model,
+            baseUrl: localKey.baseUrl,
+          };
+        }
+        // If preset but no saved key → no override (use server default for free providers)
+
         const effectiveThreadId = threadId?.startsWith("local_")
           ? undefined
           : threadId;
+
         const data = await searchQuery(
           token,
           q,
           effectiveThreadId,
-          localKey ? undefined : selectedLlmKeyId || undefined,
-          localKey
-            ? {
-                provider: localKey.provider,
-                apiKey: localKey.apiKey,
-                model: localKey.model,
-                baseUrl: localKey.baseUrl,
-              }
-            : undefined,
+          undefined,
+          llmConfigOverride,
         );
         setResult(data);
       } catch (err) {
@@ -79,20 +86,7 @@ export default function Search() {
     }
 
     runSearch();
-  }, [q, token, threadId, selectedLlmKeyId, localLlmKeys]);
-
-  useEffect(() => {
-    async function loadLlmKeys() {
-      if (!token) return;
-      try {
-        const data = await listLlmKeys(token);
-        setLlmKeys(data.keys);
-      } catch {
-        setLlmKeys([]);
-      }
-    }
-    loadLlmKeys();
-  }, [token]);
+  }, [q, token, threadId, selectedModelId]);
 
   useEffect(() => {
     if (!q.trim()) return;
@@ -118,19 +112,6 @@ export default function Search() {
       `Beginner guide for ${q || "this"}`,
     ],
     [q],
-  );
-  const modelOptions = useMemo(
-    () => [
-      ...llmKeys.map((key) => ({
-        id: key.id,
-        label: `${key.provider}/${key.model}${key.name ? ` (${key.name})` : ""}`,
-      })),
-      ...localLlmKeys.map((key) => ({
-        id: key.id,
-        label: `${key.provider}/${key.model}${key.name ? ` (${key.name})` : ""} (local)`,
-      })),
-    ],
-    [llmKeys, localLlmKeys],
   );
 
   return (
@@ -262,11 +243,10 @@ export default function Search() {
 
           <div className="pt-4">
             <SearchBox
-              modelOptions={modelOptions}
-              selectedModelId={selectedLlmKeyId}
+              selectedModelId={selectedModelId}
               onModelChange={(id) => {
-                setSelectedLlmKeyId(id);
-                localStorage.setItem("askly_selected_llm_key_id", id);
+                setSelectedModelId(id);
+                localStorage.setItem("askly_selected_model_id", id);
               }}
               onSubmit={(nextQuery) => {
                 if (!token) {
