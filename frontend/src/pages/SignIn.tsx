@@ -36,6 +36,8 @@ export default function SignIn() {
         setSession(
           response.session.access_token,
           response.user?.email ?? email,
+          response.session.refresh_token ?? null,
+          (response.session as any).expires_in ?? null,
         );
         navigate("/");
         return;

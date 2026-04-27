@@ -1,11 +1,23 @@
-import { Outlet, Link } from "react-router-dom";
+import { useEffect } from "react";
+import { Outlet, Link, useNavigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 
 export default function AppLayout() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, clearSession } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    function handleSessionExpired() {
+      clearSession();
+      navigate("/sign-in");
+    }
+    window.addEventListener("askly:session-expired", handleSessionExpired);
+    return () =>
+      window.removeEventListener("askly:session-expired", handleSessionExpired);
+  }, [clearSession, navigate]);
 
   return (
     <SidebarProvider>

@@ -23,8 +23,9 @@ export async function searchWeb(query) {
     body: JSON.stringify({
       api_key: TAVILY_API_KEY,  // our API key
       query: query,             // the user's question
-      max_results: 5,           // get top 5 results (enough context for the AI)
+      max_results: 8,           // get top 8 results for richer context
       include_answer: false,    // we want raw results, not Tavily's own answer
+      include_images: true,     // also fetch relevant images
     }),
   });
 
@@ -35,13 +36,17 @@ export async function searchWeb(query) {
 
   const data = await response.json();
 
-  // Tavily returns: { results: [{ title, url, content, score }, ...] }
-  // We just pull out the fields we need
+  // Tavily returns: { results: [{ title, url, content, score }, ...], images: [...] }
   const sources = data.results.map((result) => ({
     title: result.title,
     url: result.url,
     snippet: result.content, // the actual text snippet from the page
   }));
 
-  return sources; // e.g. [{title, url, snippet}, {title, url, snippet}, ...]
+  // images is an array of URL strings (or objects with url field)
+  const images = (data.images ?? []).map((img) =>
+    typeof img === "string" ? img : img.url
+  ).filter(Boolean);
+
+  return { sources, images };
 }

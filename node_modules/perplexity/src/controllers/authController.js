@@ -124,10 +124,38 @@ const oauthCallback = async (req, res) => {
     }
 };
 
+const refresh = async (req, res) => {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+        return res.status(400).json({ message: "refreshToken is required" });
+    }
+
+    try {
+        const { data, error } = await supabase.auth.refreshSession({
+            refresh_token: refreshToken,
+        });
+
+        if (error || !data.session) {
+            return res.status(401).json({ message: "Session refresh failed. Please sign in again." });
+        }
+
+        return res.status(200).json({
+            message: "Token refreshed",
+            session: data.session,
+            user: data.user,
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+};
+
 export default {
     signup,
     login,
     logout,
     oauthSignIn,
     oauthCallback,
+    refresh,
 };

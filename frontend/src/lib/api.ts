@@ -7,18 +7,91 @@ type RequestOptions = {
   token?: string | null;
 };
 
+const STORAGE_KEY = "askly_auth";
+
+/** Read the stored refresh_token from localStorage without importing auth context */
+function getStoredRefreshToken(): string | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw)?.refreshToken ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** Overwrite the stored access token after a silent refresh */
+function updateStoredAccessToken(
+  newToken: string,
+  newRefreshToken?: string,
+  expiresIn?: number,
+) {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    parsed.token = newToken;
+    if (newRefreshToken) parsed.refreshToken = newRefreshToken;
+    if (expiresIn) parsed.accessTokenExpiresAt = Date.now() + expiresIn * 1000;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+  } catch {
+    /* ignore */
+  }
+}
+
+/** Clear the whole session (forces re-login) */
+function clearStoredSession() {
+  localStorage.removeItem(STORAGE_KEY);
+}
+
+async function rawFetch(path: string, options: RequestOptions, token?: string | null) {
+  return fetch(`${API_BASE_URL}${path}`, {
+    method: options.method ?? "GET",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: options.body ? JSON.stringify(options.body) : undefined,
+  });
+}
+
 async function request<T>(
   path: string,
   options: RequestOptions = {},
 ): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    method: options.method ?? "GET",
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.token ? { Authorization: `Bearer ${options.token}` } : {}),
-    },
-    body: options.body ? JSON.stringify(options.body) : undefined,
-  });
+  let response = await rawFetch(path, options, options.token);
+
+  // On 401 — try to silently refresh the token and retry once
+  if (response.status === 401 && options.token) {
+    const storedRefresh = getStoredRefreshToken();
+    if (storedRefresh) {
+      try {
+        const refreshResp = await rawFetch(
+          "/api/auth/refresh",
+          { method: "POST", body: { refreshToken: storedRefresh } },
+          null,
+        );
+        if (refreshResp.ok) {
+          const refreshData = await refreshResp.json();
+          const newAccessToken = refreshData.session?.access_token;
+          const newRefreshToken = refreshData.session?.refresh_token;
+          const expiresIn = refreshData.session?.expires_in;
+          if (newAccessToken) {
+            updateStoredAccessToken(newAccessToken, newRefreshToken, expiresIn);
+            // Retry the original request with the new token
+            response = await rawFetch(path, options, newAccessToken);
+          }
+        } else {
+          // Refresh failed — clear session so user is sent to sign-in
+          clearStoredSession();
+          window.dispatchEvent(new Event("askly:session-expired"));
+        }
+      } catch {
+        clearStoredSession();
+        window.dispatchEvent(new Event("askly:session-expired"));
+      }
+    }
+  }
 
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
@@ -27,6 +100,7 @@ async function request<T>(
 
   return payload as T;
 }
+
 
 export type AuthResponse = {
   message: string;
@@ -44,10 +118,18 @@ export type AuthResponse = {
 export type SearchResponse = {
   answer: string;
   sources: Array<{ title: string; url: string; snippet: string }>;
+  images: string[];
   threadId: string;
   model?: string;
   tokenUsage?: { prompt: number; completion: number };
 };
+
+export function refreshToken(refreshToken: string) {
+  return request<AuthResponse>("/api/auth/refresh", {
+    method: "POST",
+    body: { refreshToken },
+  });
+}
 
 export function login(email: string, password: string) {
   return request<AuthResponse>("/api/auth/login", {

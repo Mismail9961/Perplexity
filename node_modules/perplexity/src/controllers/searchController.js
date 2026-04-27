@@ -141,13 +141,14 @@ const search = async (req, res) => {
     }
 
     console.log("  → Searching the web via Tavily...");
-    const sources = await searchWeb(query);
+    const { sources, images } = await searchWeb(query);
     console.log(`  → Got ${sources.length} results from the web`);
 
     if (!sources || sources.length === 0) {
       return res.status(200).json({
         answer: "Sorry, I couldn't find any relevant results for your query.",
         sources: [],
+        images: [],
         threadId: thread?.id,
       });
     }
@@ -206,6 +207,7 @@ const search = async (req, res) => {
     return res.status(200).json({
       answer: aiResult.answer,
       sources,
+      images: images ?? [],
       threadId: thread?.id,
       model: aiResult.model,
       tokenUsage: {

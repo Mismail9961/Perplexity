@@ -7,6 +7,7 @@ const router = express.Router();
 router.post("/signup", authController.signup);
 router.post("/login", authController.login);
 router.post("/logout", authController.logout);
+router.post("/refresh", authController.refresh);
 router.get("/oauth/:provider", authController.oauthSignIn);
 router.post("/oauth/callback", authController.oauthCallback);
 
